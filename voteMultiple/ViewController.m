@@ -13,6 +13,7 @@
 @interface ViewController ()
 @property (nonatomic,strong) WKWebView *webView;
 @property (nonatomic,strong)  UIButton *btn;
+@property (assign,nonatomic) int number;
 @end
 
 @implementation ViewController
@@ -21,8 +22,9 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
-   
-    [self clearCache];
+    self.number = 8062;
+    self.number += 1;
+    [self weChat];
     
     
 }
@@ -74,31 +76,45 @@
         for (int i=0; i<arr.count; i++) {
             NSHTTPCookie *cookie = arr[i];
             NSLog(@"cookie name %@  value %@  ",cookie.name,cookie.value);
+            if ([cookie.name isEqualToString:@"wx398d72182f69dfe3.id"]||[cookie.name isEqualToString:@"vx.unid"]) {
+                NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithDictionary:cookie.properties];
+                NSString *p = @"20180817160911--1221582434-";
+                self.number += 1;
+                
+                dic[@"Value"] = [NSString stringWithFormat:@"%@%d",p,self.number];
+                NSHTTPCookie *newCookie = [NSHTTPCookie cookieWithProperties:dic];
+                NSLog(@"newCookie name %@  value %@  ",newCookie.name,newCookie.value);
+                
+                [self.webView.configuration.websiteDataStore.httpCookieStore setCookie:newCookie completionHandler:^{
+                    [self.webView reload];
+                }];
+            }
+            
         }
     }];
     
     
-    NSSet *websiteDataTypes = [WKWebsiteDataStore allWebsiteDataTypes];
-
-    //// Date from
-
-    NSDate *dateFrom = [NSDate dateWithTimeIntervalSince1970:0];
-
-    //// Execute
-
-
-    [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:websiteDataTypes modifiedSince:dateFrom completionHandler:^{
-
-        // Done
-        WKWebView *wkWebView = [[WKWebView alloc] initWithFrame:CGRectZero];
-        [wkWebView evaluateJavaScript:@"navigator.userAgent" completionHandler:^(id result, NSError *error) {
-            NSString *newUserAgent = @"mozilla/5.0 (iphone; cpu iphone os 9_1_2 like mac os x) > applewebkit/537.51.2 (khtml, like gecko) mobile/11d257 > nettype/wifi";
-            NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:newUserAgent, @"UserAgent", nil];
-            [[NSUserDefaults standardUserDefaults] registerDefaults:dictionary];
-            [self createView];
-            [self performSelector:@selector(weChat) withObject:nil afterDelay:3];
-        }];
-    }];
+//    NSSet *websiteDataTypes = [WKWebsiteDataStore allWebsiteDataTypes];
+//
+//    //// Date from
+//
+//    NSDate *dateFrom = [NSDate dateWithTimeIntervalSince1970:0];
+//
+//    //// Execute
+//
+//
+//    [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:websiteDataTypes modifiedSince:dateFrom completionHandler:^{
+//
+//        // Done
+//        WKWebView *wkWebView = [[WKWebView alloc] initWithFrame:CGRectZero];
+//        [wkWebView evaluateJavaScript:@"navigator.userAgent" completionHandler:^(id result, NSError *error) {
+//            NSString *newUserAgent = @"mozilla/5.0 (iphone; cpu iphone os 9_1_2 like mac os x) > applewebkit/537.51.2 (khtml, like gecko) mobile/11d257 > nettype/wifi";
+//            NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:newUserAgent, @"UserAgent", nil];
+//            [[NSUserDefaults standardUserDefaults] registerDefaults:dictionary];
+//            [self createView];
+//            [self performSelector:@selector(weChat) withObject:nil afterDelay:3];
+//        }];
+//    }];
     
     
     
